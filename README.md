@@ -1,3 +1,6 @@
+![Language](https://img.shields.io/badge/Language-C-blue)
+![Platform](https://img.shields.io/badge/Platform-STM32-orange)
+![Framework](https://img.shields.io/badge/Framework-LVGL-green)
 # 基于 STM32 与 LVGL 的自行车智能码表
 
 这是一个从零开始手敲的嵌入式 GUI 项目。本项目记录了从前期 Windows 端 LVGL 模拟器开发、核心性能问题攻坚，到最终移植至 STM32 硬件平台并完善底层驱动的完整过程。文档旨在清晰复盘项目的实现思路、遇到的技术难点及解决方案。
