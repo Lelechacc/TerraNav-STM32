@@ -1,275 +1,250 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>STM32 + LVGL 全地形越野导航仪表 | 项目展示</title>
-    <style>
-        :root { 
-            --bg-main: #F5F5F7;      
-            /* 重点：卡片变成半透明白底，用来透出背景图 */
-            --card-bg: rgba(255, 255, 255, 0.65); 
-            --text-main: #1D1D1F;    
-            --text-muted: #86868B;   
-            --accent-blue: #007AFF;  
-            --border-color: rgba(210, 210, 215, 0.4); 
-        }
-        
-        body { 
-            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif; 
-            
-            /* ==========================================
-               🚀 魔法背景：直接加载你指定的 JPG 图片
-               ========================================== */
-            background-color: var(--bg-main);
-            background-image: url('images/2153816071994343424.jpg'); 
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed; /* 滚动时背景不动 */
-            background-repeat: no-repeat;
-            
-            color: var(--text-main); 
-            line-height: 1.5; 
-            margin: 0; 
-            padding: 0; 
-            -webkit-font-smoothing: antialiased;
-            min-height: 100vh;
-        }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STM32 + LVGL 的全地形导航仪表 | 项目展示</title>
+    <style>
+        :root { 
+            --bg-main: #F5F5F7;      /* 苹果标志性的干净浅灰底色 */
+            --card-bg: #FFFFFF;      /* 纯白卡片背景 */
+            --text-main: #1D1D1F;    /* 近乎黑色的深灰，阅读极佳 */
+            --text-muted: #86868B;   /* 辅助文字灰 */
+            --accent-blue: #007AFF;  /* 苹果标准蓝色 */
+            --border-color: #D2D2D7; /* 极细分割线颜色 */
+        }
+        
+        /* 亮色调、干净的 iMac 风格背景 */
+        body { 
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif; 
+            background: var(--bg-main);
+            color: var(--text-main); 
+            line-height: 1.5; 
+            margin: 0; 
+            padding: 0; 
+            -webkit-font-smoothing: antialiased; /* 文字抗锯齿，更清晰 */
+        }
 
-        .container { max-width: 1080px; margin: 0 auto; padding: 60px 30px; position: relative; z-index: 2; }
-        
-        header { text-align: left; padding-bottom: 50px; border-bottom: 1px solid rgba(0,0,0,0.1); }
-        h1 { 
-            font-size: 2.5em; 
-            font-weight: 700;
-            color: var(--text-main);
-            margin: 0 0 10px 0; 
-            letter-spacing: -0.5px;
-            text-shadow: 0 2px 10px rgba(255,255,255,0.5); /* 保证标题在花背景下能看清 */
-        }
-        header p { color: var(--text-main); font-size: 1.2em; font-weight: 600; margin: 0; }
-        .badges { margin: 25px 0 0 0; text-align: left; }
-        .badges img { margin-right: 8px; height: 26px; border-radius: 4px; }
-        
-        .video-section { margin: 60px 0; text-align: center; }
-        .video-box { 
-            background: #000; 
-            border-radius: 20px; 
-            overflow: hidden; 
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); 
-            border: 1px solid rgba(255,255,255,0.5); 
-            padding: 10px;
-            display: inline-block;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-        video { width: 100%; display: block; border-radius: 12px; }
+        .container { max-width: 1080px; margin: 0 auto; padding: 60px 30px; }
+        
+        /* 顶部标题 - 极简、左对齐，像产品主页 */
+        header { text-align: left; padding-bottom: 50px; border-bottom: 1px solid rgba(0,0,0,0.1); }
+        h1 { 
+            font-size: 2.5em; 
+            font-weight: 700;
+            color: var(--text-main);
+            margin: 0 0 10px 0; 
+            letter-spacing: -0.5px;
+        }
+        header p { color: var(--text-muted); font-size: 1.2em; font-weight: 400; margin: 0; }
+        .badges { margin: 25px 0 0 0; text-align: left; }
+        .badges img { margin-right: 8px; height: 26px; border-radius: 4px; }
+        
+        /* 全功能演示 - 严格限制大小，精致展示 */
+        .video-section { margin: 60px 0; text-align: center; }
+        .video-box { 
+            background: var(--card-bg); 
+            border-radius: 20px; 
+            overflow: hidden; 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* 极轻的阴影，增加深度 */
+            border: 1px solid rgba(0,0,0,0.05); 
+            padding: 10px;
+            display: inline-block; /* 核心：让盒子包裹视频内容，而非强行全宽 */
+            max-width: 600px; /* 核心：在27寸屏幕上限制最大宽度，保证精致 */
+            margin: 0 auto;
+        }
+        video { width: 100%; display: block; border-radius: 12px; }
 
-        h2 { 
-            color: var(--text-main); 
-            font-size: 2em;
-            font-weight: 600;
-            margin-top: 80px; 
-            margin-bottom: 30px;
-            text-align: left;
-            text-shadow: 0 2px 10px rgba(255,255,255,0.8); /* 标题加白边防遮挡 */
-        }
-        h3 { color: var(--text-main); margin-top: 0; font-size: 1.3em; font-weight: 600; }
+        /* 通用章节标题 - 干净、有呼吸感 */
+        h2 { 
+            color: var(--text-main); 
+            font-size: 2em;
+            font-weight: 600;
+            margin-top: 80px; 
+            margin-bottom: 30px;
+            text-align: left;
+            letter-spacing: -0.2px;
+        }
+        h3 { color: var(--text-main); margin-top: 0; font-size: 1.3em; font-weight: 600; }
 
-        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; margin: 30px 0; }
-        
-        /* ==========================================
-           🚀 毛玻璃特效：让所有卡片透出背景图片
-           ========================================== */
-        .bento-item, .list-card, .tech-box, .grid-3-item {
-            background: var(--card-bg) !important; 
-            backdrop-filter: blur(25px) saturate(180%) !important; 
-            -webkit-backdrop-filter: blur(25px) saturate(180%) !important; 
-            border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.6) !important; 
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important; 
-            transition: all 0.3s ease; 
-        }
+        /* 便当盒网格布局 (Bento Grid) - 用于核心亮点和功能 */
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 25px; margin: 30px 0; }
+        .bento-item { 
+            background: var(--card-bg); 
+            border-radius: 20px; 
+            padding: 30px; 
+            text-align: center; 
+            border: 1px solid rgba(0,0,0,0.05); 
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.03);
+            transition: all 0.2s ease; 
+        }
+        .bento-item:hover { 
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+        }
+        .bento-item img { width: 100%; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.05); }
+        .bento-item p { font-size: 1.1em; color: var(--text-main); margin: 0; font-weight: 500; }
 
-        .bento-item { padding: 30px; text-align: center; }
-        .bento-item:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.15) !important; }
-        .bento-item img { width: 100%; border-radius: 10px; margin-bottom: 20px; border: 1px solid rgba(0,0,0,0.05); }
-        .bento-item p { font-size: 1.1em; color: var(--text-main); margin: 0; font-weight: 600; }
+        /* 功能与选型 - 使用 structured list */
+        .structured-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-top: 30px;
+        }
+        .list-card {
+            background: var(--card-bg); 
+            border-radius: 20px; 
+            padding: 30px; 
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        ul { padding-left: 18px; margin: 0; }
+        li { margin-bottom: 12px; color: var(--text-main); font-size: 1.05em;}
+        li b { color: var(--accent-blue); }
 
-        .structured-list { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 30px; }
-        .list-card { padding: 30px; }
-        ul { padding-left: 18px; margin: 0; }
-        li { margin-bottom: 12px; color: var(--text-main); font-size: 1.05em; font-weight: 500;}
-        li b { color: var(--accent-blue); font-weight: 700;}
+        /* 技术详情列表框（更清爽的科技感） */
+        .tech-box { 
+            background: var(--card-bg); 
+            padding: 25px; 
+            border-radius: 20px; 
+            border: 1px solid rgba(0,0,0,0.05); 
+            margin: 25px 0; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+        }
+        .tech-box h3 { color: var(--accent-blue); margin-bottom: 10px; }
+        .tech-box p { color: var(--text-main); margin-bottom: 0;}
+        code { background: rgba(0,122,255,0.06); padding: 4px 10px; border-radius: 6px; color: var(--accent-blue); font-family: monospace; font-weight: bold; }
+        
+        /* 模拟器与硬件展示 - 3列便当网格 */
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 30px 0; }
+        .grid-3-item { 
+            background: var(--card-bg); 
+            border-radius: 16px; 
+            padding: 20px; 
+            text-align: center; 
+            border: 1px solid rgba(0,0,0,0.05); 
+        }
+        .grid-3-item img { width: 100%; border-radius: 8px; margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.05); }
+        .grid-3-item p { font-size: 0.95em; color: var(--text-main); margin: 0; font-weight: 500; }
 
-        .tech-box { padding: 25px; margin: 25px 0; }
-        .tech-box h3 { color: var(--accent-blue); margin-bottom: 10px; font-weight: 800;}
-        .tech-box p { color: var(--text-main); margin-bottom: 0; font-weight: 500;}
-        
-        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 30px 0; }
-        .grid-3-item { padding: 20px; text-align: center; }
-        .grid-3-item img { width: 100%; border-radius: 8px; margin-bottom: 15px; border: 1px solid rgba(0,0,0,0.05); }
-        .grid-3-item p { font-size: 0.95em; color: var(--text-main); margin: 0; font-weight: 600; }
-
-        /* ==========================================
-           🎵 苹果风音乐播放器小组件
-           ========================================== */
-        .music-widget {
-            position: fixed; bottom: 30px; right: 30px;
-            background: rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(15px);
-            padding: 10px 20px; border-radius: 50px;
-            display: flex; align-items: center; gap: 15px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            border: 1px solid rgba(255,255,255,0.5);
-            z-index: 1000;
-        }
-        .music-info { font-size: 13px; font-weight: 600; color: #1d1d1f; display: flex; align-items: center; gap: 8px;}
-        .dot { width: 8px; height: 8px; background: #30d158; border-radius: 50%; box-shadow: 0 0 8px #30d158; }
-        .play-btn { 
-            background: var(--accent-blue); color: white; border: none; 
-            padding: 6px 16px; border-radius: 20px; cursor: pointer; font-size: 12px; font-weight: bold;
-        }
-
-        footer { text-align: center; padding: 60px 0 30px; color: var(--text-main); font-weight: 600; font-size: 1em; border-top: 1px solid var(--border-color); margin-top: 80px;}
-        footer a { color: var(--accent-blue); text-decoration: none; font-weight: 800; transition: 0.2s; }
-        footer a:hover { text-decoration: underline; }
-    </style>
+        footer { text-align: center; padding: 60px 0 30px; color: var(--text-muted); font-size: 1em; border-top: 1px solid var(--border-color); margin-top: 80px;}
+        footer a { color: var(--accent-blue); text-decoration: none; font-weight: 600; transition: 0.2s; }
+        footer a:hover { text-decoration: underline; }
+    </style>
 </head>
 <body>
 
-<div class="music-widget">
-    <div class="music-info"><div class="dot"></div>Sony WH-1000XM4 Hi-Res</div>
-    <audio id="bg-music" loop>
-        <source src="music/bg.mp3" type="audio/mpeg">
-    </audio>
-    <button onclick="toggleMusic()" id="music-btn" class="play-btn">播放</button>
-</div>
-
 <div class="container">
-    <header>
-        <h1>🚲 基于 STM32 + LVGL 的全地形导航仪表</h1>
-        <p>嵌入式图形架构深度优化 | 离线地图调度与姿态感知实战复盘</p>
-        <div class="badges">
-            <img src="https://img.shields.io/badge/Language-C-blue" alt="C">
-            <img src="https://img.shields.io/badge/Platform-STM32F405-orange" alt="STM32">
-            <img src="https://img.shields.io/badge/Framework-LVGL_9-green" alt="LVGL">
-        </div>
-    </header>
+    <header>
+        <h1>🚲 STM32 + LVGL 的全地形导航仪表</h1>
+        <p>全栈嵌入式实践 | 从底层驱动到图形界面开发复盘</p>
+        <div class="badges">
+            <img src="https://img.shields.io/badge/Language-C-blue" alt="C">
+            <img src="https://img.shields.io/badge/Platform-STM32-orange" alt="STM32">
+            <img src="https://img.shields.io/badge/Framework-LVGL-green" alt="LVGL">
+        </div>
+    </header>
 
-    <section class="video-section">
-        <div class="video-box">
-            <video controls poster="images/实物路书页面.jpg">
-                <source src="images/demo_video.mp4" type="video/mp4">
-                您的浏览器不支持播放该视频。
-            </video>
-        </div>
-    </section>
+    <section class="video-section">
+        <div class="video-box">
+            <video controls poster="images/实物路书页面.jpg">
+                <source src="images/demo_video.mp4" type="video/mp4">
+                您的浏览器不支持播放该视频。
+            </video>
+        </div>
+    </section>
 
-    <section>
-        <h2>🚀 核心亮点</h2>
-        <div class="grid">
-            <div class="bento-item">
-                <img src="images/语音切换.gif" alt="语言切换">
-                <p>中英文静态翻译映射与实时重绘</p>
-            </div>
-            <div class="bento-item">
-                <img src="images/主题一键切换.gif" alt="主题切换">
-                <p>深色/浅色模式动态 UI 引擎</p>
-            </div>
-        </div>
-    </section>
+    <section>
+        <h2>🚀 核心亮点</h2>
+        <div class="grid">
+            <div class="bento-item">
+                <img src="images/语音切换.gif" alt="语言切换">
+                <p>中英文静态翻译无缝切换</p>
+            </div>
+            <div class="bento-item">
+                <img src="images/主题一键切换.gif" alt="主题切换">
+                <p>深色/浅色模式动态重绘UI</p>
+            </div>
+        </div>
+    </section>
 
-    <section>
-        <h2>⚙️ 架构细节与选型</h2>
-        <div class="structured-list">
-            <div class="list-card">
-                <h3>核心功能</h3>
-                <ul>
-                    <li><b>离线地图</b>：基于墨卡托投影的局部 GPS 地图映射。</li>
-                    <li><b>姿态感知</b>：集成陀螺仪，实时解算坡度与朝向。</li>
-                    <li><b>硬件优化</b>：支持深浅模式与中英双语动态切换。</li>
-                    <li><b>数据融合</b>：实时显示速度、经纬度、卫星数与电量。</li>
-                </ul>
-            </div>
-            <div class="list-card">
-                <h3>硬件配置</h3>
-                <ul>
-                    <li><b>主控</b>：STM32F405RGT6 (Cortex-M4, 168MHz)</li>
-                    <li><b>存储</b>：SD Card (SDIO总线) 存放离线地图瓦片</li>
-                    <li><b>屏幕</b>：240*320 TFT (ST7789驱动) + 电容触摸</li>
-                    <li><b>传感</b>：ATGM336H (GPS) + LSM6DSM (六轴陀螺仪)</li>
-                </ul>
-            </div>
-        </div>
-    </section>
+    <section>
+        <h2>⚙️ 功能与架构</h2>
+        <div class="structured-list">
+            <div class="list-card">
+                <h3>主要功能</h3>
+                <ul>
+                    <li><b>基础交互</b>：基于 LVGL 实现彩色 UI。</li>
+                    <li><b>本地化支持</b>：中英文切换 & 深浅模式实时切换。</li>
+                    <li><b>骑行数据</b>：实时显示速度、电量、卫星数等。</li>
+                    <li><b>地图导航</b>：支持局部 GPS 地图滚动与路书。</li>
+                </ul>
+            </div>
+            <div class="list-card">
+                <h3>硬件选型</h3>
+                <ul>
+                    <li><b>主控</b>：STM32F405 / STM32H750</li>
+                    <li><b>屏幕</b>：240*320 TFT (ST7789) + 电容触摸 (CST)</li>
+                    <li><b>传感器</b>：ATGM336H (GPS) + LSM6DSM (陀螺仪)</li>
+                    <li><b>供电</b>：3.7V 500mAh 三元锂电池</li>
+                </ul>
+            </div>
+        </div>
+    </section>
 
-    <section>
-        <h2>🔥 技术难点攻坚</h2>
-        <div class="tech-box">
-            <h3>难点一：SDIO+DMA 地图动态调度机制</h3>
-            <p>为解决单片机 SRAM 无法承载高清离线地图的瓶颈，设计了“九宫格”加载机制。通过 <b>SDIO 结合 DMA</b> 直接从外部存储提取 BMP 原始像素并推入显示缓冲区，显著降低了 CPU 负载，实现了丝滑平移。</p>
-        </div>
+    <section>
+        <h2>🔥 技术难点与解决方案</h2>
+        
+        <div class="tech-box">
+            <h3>难点一：地图动态铺设与性能瓶颈</h3>
+            <p>实现地图滚动需采用“九宫格”加载机制。单张 256x256 图片在 30Hz 刷新率下需 3MB/s 吞吐量。F405 CPU 直接推屏卡顿。</p>
+            <p><b>解决方案：</b> 在硬件端利用 <b>DMA2D 硬件图形加速器</b> 搬运数据，彻底解放 CPU，实现丝滑滑动。</p>
+        </div>
 
-        <div class="tech-box">
-            <h3>难点二：数据平滑滤波与线程安全</h3>
-            <p>针对颠簸环境下的姿态抖动，引入了 <b>滑动平均滤波算法</b> 净化原始采样数据；同时利用 <code>lv_async_call()</code> 机制隔离外设中断与 GUI 渲染层，彻底规避了高频数据抢占导致的死锁问题。</p>
-        </div>
-    </section>
+        <div class="tech-box">
+            <h3>难点二：数据绑定的线程安全</h3>
+            <p>在定时器中断 (<code>timer_handler</code>) 中直接修改 UI 数据会导致 <code>HardFault</code>。</p>
+            <p><b>解决方案：</b> 引入 <code>lv_async_call()</code> 机制；或使用 <b>FreeRTOS</b> 的互斥锁（Mutex）严格控制时序。</p>
+        </div>
+    </section>
 
-    <section>
-        <h2>💻 PC 模拟器验证阶段</h2>
-        <div class="grid-3">
-            <div class="grid-3-item">
-                <img src="images/模拟器LVGL%20设置界面.png" alt="设置界面">
-                <p>系统设置交互层</p>
-            </div>
-            <div class="grid-3-item">
-                <img src="images/模拟器LVGL%20通用数据界面.png" alt="数据页面">
-                <p>仪表数据监测页</p>
-            </div>
-            <div class="grid-3-item">
-                <img src="images/获取并处理瓦片地图数据.png" alt="地图工具">
-                <p>地图数据处理工具链</p>
-            </div>
-        </div>
-    </section>
+    <section>
+        <h2>💻 PC 模拟器开发阶段</h2>
+        <p style="color: var(--text-muted); text-align: center; margin-bottom: 40px; font-weight: 500;">脱离硬件束缚，前期 90% 的交互逻辑在 PC 模拟器完成验证。</p>
+        <div class="grid-3">
+            <div class="grid-3-item">
+                <img src="images/模拟器LVGL%20设置界面.png" alt="设置界面">
+                <p>设置功能页面</p>
+            </div>
+            <div class="grid-3-item">
+                <img src="images/模拟器LVGL%20通用数据界面.png" alt="数据页面">
+                <p>通用数据监测页</p>
+            </div>
+            <div class="grid-3-item">
+                <img src="images/获取并处理瓦片地图数据.png" alt="地图工具">
+                <p>地图数据处理工具链</p>
+            </div>
+        </div>
+    </section>
 
-    <section>
-        <h2>🛠️ 硬件打样与最终实机</h2>
-        <div class="grid-3" style="grid-template-columns: 1fr 1fr;"> 
-            <div class="grid-3-item">
-                <img src="images/hardware_back.jpg" alt="硬件背面">
-                <p>内部电路与排线布局</p>
-            </div>
-            <div class="grid-3-item">
-                <img src="images/黑金主题页面.jpg" alt="实机效果">
-                <p>硬件实机运行 (深色模式)</p>
-            </div>
-        </div>
-    </section>
+    <section>
+        <h2>🛠️ 硬件移植与最终成品</h2>
+        <div class="grid-3" style="grid-template-columns: 1fr 1fr;"> <div class="grid-3-item">
+                <img src="images/hardware_back.jpg" alt="硬件背面">
+                <p>内部电路板与排线布局</p>
+            </div>
+            <div class="grid-3-item">
+                <img src="images/黑金主题页面.jpg" alt="实机效果">
+                <p>硬件实机效果 (黑金模式)</p>
+            </div>
+        </div>
+    </section>
 
-    <footer>
-        <p>© 2026 Developed by Lelechacc. | 专注嵌入式底层与图形系统开发</p>
-        <p><a href="https://github.com/Lelechacc/speed_meter" target="_blank">View Repository on GitHub</a></p>
-    </footer>
+    <footer>
+        <p>© 2026 Developed by Lelechacc. | 专注嵌入式底层开发</p>
+        <p><a href="https://github.com/Lelechacc/speed_meter" target="_blank">View Repository on GitHub</a></p>
+    </footer>
 </div>
-
-<script>
-    function toggleMusic() {
-        var music = document.getElementById("bg-music");
-        var btn = document.getElementById("music-btn");
-        if (music.paused) {
-            music.play();
-            btn.innerHTML = "暂停";
-            btn.style.background = "#FF3B30"; // 播放时按钮变红
-        } else {
-            music.pause();
-            btn.innerHTML = "播放";
-            btn.style.background = "#007AFF"; // 暂停变回蓝色
-        }
-    }
-</script>
 
 </body>
 </html>
+ 这个也要改
