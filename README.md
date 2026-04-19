@@ -8,7 +8,7 @@
 
 本项目是一款针对户外越野场景设计的嵌入式导航终端。实现了从 Windows 模拟器逻辑验证到硬件平台深度优化的完整开发闭环，重点攻克了低算力平台下的大规模地图渲染与高频传感器数据处理等工程难题。
 
-👉 **[点击这里访问：项目在线演示主页（iMac 风格）](https://lelechacc.github.io/speed_meter/)**
+👉 **[点击这里访问：项目在线演示主页（iMac 风格）](https://lelechacc.github.io/TerraNav-STM32/)**
 
 ---
 
